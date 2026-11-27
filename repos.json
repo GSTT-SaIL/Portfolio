@@ -1,0 +1,180 @@
+{
+  "repos": [
+    {
+      "name": "SaIL-Away",
+      "description": "SaIL Facility and team management system. Source code available - WEBAPP FOR INTERNAL USE ONLY",
+      "html_url": "https://github.com/GSTT-SaIL/SaIL-Away",
+      "homepage": "https://gstt-sail.github.io/SaIL-Away/",
+      "fork": false,
+      "default_branch": "main",
+      "license": null,
+      "latestReleaseUrl": ""
+    },
+    {
+      "name": "SaIL360Tour",
+      "description": "Simple 360 degree virtual tour of the SaIL Centre",
+      "html_url": "https://github.com/GSTT-SaIL/SaIL360Tour",
+      "homepage": "https://gstt-sail.github.io/SaIL360Tour/",
+      "fork": false,
+      "default_branch": "main",
+      "license": {
+        "spdx_id": "MIT"
+      },
+      "latestReleaseUrl": ""
+    },
+    {
+      "name": "LapBoxCamera",
+      "description": "A lightweight browser-based camera viewer and recorder for webcam-based laparoscopic simulator boxes, prioritising latency. ",
+      "html_url": "https://github.com/GSTT-SaIL/LapBoxCamera",
+      "homepage": "https://gstt-sail.github.io/LapBoxCamera/",
+      "fork": false,
+      "default_branch": "main",
+      "license": {
+        "spdx_id": "AGPL-3.0"
+      },
+      "latestReleaseUrl": "https://github.com/GSTT-SaIL/LapBoxCamera/releases/tag/v1"
+    },
+    {
+      "name": "Patient-Monitor",
+      "description": "Simple web-based patient monitor simulator",
+      "html_url": "https://github.com/GSTT-SaIL/Patient-Monitor",
+      "homepage": "https://gstt-sail.github.io/Patient-Monitor/",
+      "fork": false,
+      "default_branch": "main",
+      "license": {
+        "spdx_id": "AGPL-3.0"
+      },
+      "latestReleaseUrl": ""
+    },
+    {
+      "name": "SOI-FlyerGen",
+      "description": "A small browser-based tool for creating event and course flyers from a single form.",
+      "html_url": "https://github.com/GSTT-SaIL/SOI-FlyerGen",
+      "homepage": "https://gstt-sail.github.io/SOI-FlyerGen/",
+      "fork": false,
+      "default_branch": "main",
+      "license": {
+        "spdx_id": "AGPL-3.0"
+      },
+      "latestReleaseUrl": ""
+    },
+    {
+      "name": "SaIL-FlyerGen",
+      "description": "A small browser-based tool for creating event and course flyers from a single form.",
+      "html_url": "https://github.com/GSTT-SaIL/SaIL-FlyerGen",
+      "homepage": "https://gstt-sail.github.io/SaIL-FlyerGen/",
+      "fork": false,
+      "default_branch": "main",
+      "license": {
+        "spdx_id": "AGPL-3.0"
+      },
+      "latestReleaseUrl": ""
+    },
+    {
+      "name": "SaIL-FlyerGen-Multi",
+      "description": "A small browser-based tool for creating event and course flyers from a single form",
+      "html_url": "https://github.com/GSTT-SaIL/SaIL-FlyerGen-Multi",
+      "homepage": "https://gstt-sail.github.io/SaIL-FlyerGen-Multi/",
+      "fork": false,
+      "default_branch": "master",
+      "license": {
+        "spdx_id": "AGPL-3.0"
+      },
+      "latestReleaseUrl": ""
+    },
+    {
+      "name": "Principles-of-Human-Factors",
+      "description": null,
+      "html_url": "https://github.com/GSTT-SaIL/Principles-of-Human-Factors",
+      "homepage": "https://gstt-sail.github.io/Principles-of-Human-Factors/",
+      "fork": false,
+      "default_branch": "main",
+      "license": null,
+      "latestReleaseUrl": ""
+    },
+    {
+      "name": "Portfolio",
+      "description": "A small public portfolio page for SaIL tools",
+      "html_url": "https://github.com/GSTT-SaIL/Portfolio",
+      "homepage": "https://gstt-sail.github.io/Portfolio/",
+      "fork": false,
+      "default_branch": "main",
+      "license": {
+        "spdx_id": "MIT"
+      },
+      "latestReleaseUrl": ""
+    },
+    {
+      "name": "Presenter",
+      "description": null,
+      "html_url": "https://github.com/GSTT-SaIL/Presenter",
+      "homepage": "https://gstt-sail.github.io/Presenter/",
+      "fork": false,
+      "default_branch": "main",
+      "license": {
+        "spdx_id": "AGPL-3.0"
+      },
+      "latestReleaseUrl": ""
+    },
+    {
+      "name": "WebAV",
+      "description": "Ultra-simple, yet fully featured, web based AV streaming system. Ideal for in-situ simulation.",
+      "html_url": "https://github.com/GSTT-SaIL/WebAV",
+      "homepage": "https://gstt-sail.github.io/WebAV/",
+      "fork": false,
+      "default_branch": "main",
+      "license": {
+        "spdx_id": "AGPL-3.0"
+      },
+      "latestReleaseUrl": ""
+    },
+    {
+      "name": "EPR",
+      "description": "A browser-based simulated patient record system for teaching and simulation delivery.",
+      "html_url": "https://github.com/GSTT-SaIL/EPR",
+      "homepage": "",
+      "fork": false,
+      "default_branch": "main",
+      "license": {
+        "spdx_id": "AGPL-3.0"
+      },
+      "latestReleaseUrl": ""
+    },
+    {
+      "name": "MinuteGen",
+      "description": "Framework example webapp for generating Word documents from a transcript using a DOCX template and AI.",
+      "html_url": "https://github.com/GSTT-SaIL/MinuteGen",
+      "homepage": "",
+      "fork": false,
+      "default_branch": "main",
+      "license": {
+        "spdx_id": "AGPL-3.0"
+      },
+      "latestReleaseUrl": ""
+    },
+    {
+      "name": "SILO360",
+      "description": "An Android app allowing for live 360 AV streaming on tablets and VR headsets, prioritising the ability of participants to view within the same room",
+      "html_url": "https://github.com/GSTT-SaIL/SILO360",
+      "homepage": "",
+      "fork": false,
+      "default_branch": "master",
+      "license": {
+        "spdx_id": "AGPL-3.0"
+      },
+      "latestReleaseUrl": ""
+    },
+    {
+      "name": "EP-Communicator",
+      "description": "A simple Android app for simulated education scenarios for speaking privately to embedded participants, plants or actors",
+      "html_url": "https://github.com/GSTT-SaIL/EP-Communicator",
+      "homepage": "",
+      "fork": false,
+      "default_branch": "main",
+      "license": {
+        "spdx_id": "AGPL-3.0"
+      },
+      "latestReleaseUrl": "https://github.com/GSTT-SaIL/EP-Communicator/releases/tag/v1"
+    }
+  ]
+}
