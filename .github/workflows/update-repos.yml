@@ -1,0 +1,78 @@
+# Builds repos.json so the page can list tools without calling the GitHub API
+# from every visitor's browser. Uses the workflow's built-in GITHUB_TOKEN:
+# no personal API key is stored anywhere.
+name: Update repos.json
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'   # every 6 hours
+  workflow_dispatch:          # "Run workflow" button in the Actions tab
+  push:
+    branches: [main]
+    paths: ['.github/workflows/update-repos.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-repos
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch repositories and latest releases (one GraphQL call)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: GSTT-SaIL
+        run: |
+          gh api graphql -F owner="$OWNER" -f query='
+            query($owner: String!) {
+              repositoryOwner(login: $owner) {
+                repositories(first: 100, privacy: PUBLIC, ownerAffiliations: OWNER,
+                             orderBy: {field: UPDATED_AT, direction: DESC}) {
+                  nodes {
+                    name
+                    description
+                    url
+                    homepageUrl
+                    isFork
+                    defaultBranchRef { name }
+                    licenseInfo { spdxId }
+                    latestRelease { url }
+                  }
+                }
+              }
+            }' > raw.json
+
+          # Reshape into the same field names the page already uses (REST style).
+          jq '{
+            repos: [ .data.repositoryOwner.repositories.nodes[] | {
+              name,
+              description,
+              html_url: .url,
+              homepage: (.homepageUrl // ""),
+              fork: .isFork,
+              default_branch: (.defaultBranchRef.name // "main"),
+              license: (if .licenseInfo then { spdx_id: .licenseInfo.spdxId } else null end),
+              latestReleaseUrl: (.latestRelease.url // "")
+            } ]
+          }' raw.json > repos.json
+          rm raw.json
+
+          test "$(jq '.repos | length' repos.json)" -gt 0
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- repos.json && git ls-files --error-unmatch repos.json >/dev/null 2>&1; then
+            echo "repos.json unchanged"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898333+github-actions[bot]@users.noreply.github.com"
+          git add repos.json
+          git commit -m "Update repos.json"
+          git push

@@ -542,26 +542,117 @@
     }
   }
 
+  // ---- Rate-limit friendly loading -------------------------------------
+  // 1. Prefer repos.json (same origin, built by a GitHub Action) — zero API calls.
+  // 2. Otherwise call the API, but cache results in localStorage so repeat
+  //    visits make no requests, and fall back to stale data when rate-limited.
+  const SNAPSHOT_URL = 'repos.json';
+  const CACHE_PREFIX = 'sail-portfolio:';
+  const REPOS_TTL = 30 * 60 * 1000;          // repo list: 30 minutes
+  const RELEASE_TTL = 24 * 60 * 60 * 1000;   // release lookup: 24 hours (or when repo is pushed)
+
+  function readCache(key) {
+    try { return JSON.parse(localStorage.getItem(CACHE_PREFIX + key)); } catch { return null; }
+  }
+
+  function writeCache(key, value) {
+    try { localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(value)); } catch {}
+  }
+
+  // Remember when GitHub says the limit resets, so we stop calling until then.
+  function rateLimitedUntil() {
+    const until = readCache('rateLimitReset') || 0;
+    return until > Date.now() ? until : 0;
+  }
+
+  function noteRateLimit(res) {
+    const remaining = res.headers.get('x-ratelimit-remaining');
+    const reset = Number(res.headers.get('x-ratelimit-reset'));
+    if ((res.status === 403 || res.status === 429 || remaining === '0') && reset) {
+      writeCache('rateLimitReset', reset * 1000);
+    }
+  }
+
+  async function loadSnapshot() {
+    try {
+      const res = await fetch(SNAPSHOT_URL, { cache: 'no-cache' });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return Array.isArray(data?.repos) ? data.repos : null;
+    } catch {
+      return null;
+    }
+  }
+
   async function getLatestReleaseUrl(repo) {
     if (!repo.releases_url) return '';
+
+    const key = `release:${repo.name}`;
+    const cached = readCache(key);
+    const fresh = cached
+      && cached.pushedAt === repo.pushed_at
+      && Date.now() - cached.time < RELEASE_TTL;
+    if (fresh || (cached && rateLimitedUntil())) return cached.url;
+    if (rateLimitedUntil()) return '';
 
     try {
       const latestUrl = repo.releases_url.replace('{/id}', '/latest');
       const res = await fetch(latestUrl);
-      if (!res.ok) return '';
+      noteRateLimit(res);
 
-      const release = await res.json();
-      return typeof release.html_url === 'string' ? release.html_url : '';
+      let url = '';
+      if (res.ok) {
+        const release = await res.json();
+        url = typeof release.html_url === 'string' ? release.html_url : '';
+      } else if (res.status !== 404) {
+        return cached ? cached.url : '';   // transient/limit error: keep what we had
+      }
+      writeCache(key, { url, pushedAt: repo.pushed_at, time: Date.now() });
+      return url;
     } catch {
-      return '';
+      return cached ? cached.url : '';
     }
+  }
+
+  async function fetchReposFromApi() {
+    const cached = readCache('repos');
+    if (cached && (Date.now() - cached.time < REPOS_TTL || rateLimitedUntil())) {
+      return cached.repos;
+    }
+
+    let res;
+    try {
+      res = await fetch(API);
+    } catch (err) {
+      if (cached) return cached.repos;
+      throw err;
+    }
+    noteRateLimit(res);
+
+    if (res.ok) {
+      const repos = await res.json();
+      if (Array.isArray(repos)) writeCache('repos', { repos, time: Date.now() });
+      return repos;
+    }
+    if (cached) {
+      console.warn(`GitHub responded ${res.status}; showing cached repo list.`);
+      return cached.repos;
+    }
+    return res; // let the caller report the error
   }
 
   async function loadRepos() {
     const grid = document.getElementById('tools-grid');
     try {
-      const res = await fetch(API);
-      if (!res.ok) {
+      const snapshot = await loadSnapshot();
+      if (snapshot) {
+        renderRepos(grid, snapshot);
+        return;
+      }
+
+      const result = await fetchReposFromApi();
+      if (result instanceof Response) {
+        const res = result;
         let reason = '';
         if (res.status === 403) {
           reason = 'Possible reasons: Rate limit exceeded, missing/invalid authentication, or CORS restrictions.';
@@ -582,7 +673,7 @@
         console.error(`GitHub API request failed: ${res.status} ${res.statusText}. ${reason} ${errorDetails}`);
         throw new Error(`GitHub responded ${res.status}. ${reason} ${errorDetails}`);
       }
-      const repos = await res.json();
+      const repos = result;
 
       if (!Array.isArray(repos) || repos.length === 0) {
         grid.innerHTML = '<div class="status">No tools published yet.</div>';
@@ -597,6 +688,27 @@
           latestReleaseUrl: await getLatestReleaseUrl(repo)
         }))
       );
+
+      renderRepos(grid, reposWithReleaseUrls);
+    } catch (err) {
+      console.error('GitHub API error:', err);
+      if (err && err.message && err.message.includes('403')) {
+        console.error('Likely causes: Rate limit exceeded, missing/invalid authentication, or CORS restrictions.');
+      }
+      grid.innerHTML = `<div class="status error">
+        Couldn't reach GitHub.<br>
+        <a href="https://github.com/${USERNAME}" target="_blank">Browse directly →</a>
+      </div>`;
+    }
+  }
+
+  function renderRepos(grid, repos) {
+      const own = repos.filter(r => !r.fork);
+      const reposWithReleaseUrls = own.length ? own : repos;
+      if (reposWithReleaseUrls.length === 0) {
+        grid.innerHTML = '<div class="status">No tools published yet.</div>';
+        return;
+      }
 
       grid.innerHTML = '';
       reposWithReleaseUrls.forEach((repo, i) => {
@@ -648,16 +760,6 @@
         `;
         grid.appendChild(card);
       });
-    } catch (err) {
-      console.error('GitHub API error:', err);
-      if (err && err.message && err.message.includes('403')) {
-        console.error('Likely causes: Rate limit exceeded, missing/invalid authentication, or CORS restrictions.');
-      }
-      grid.innerHTML = `<div class="status error">
-        Couldn't reach GitHub.<br>
-        <a href="https://github.com/${USERNAME}" target="_blank">Browse directly →</a>
-      </div>`;
-    }
   }
 
   loadRepos();
